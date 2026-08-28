@@ -143,7 +143,10 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 7, , 8]);
+                console.log("a connection attempt is happening now");
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 8, , 9]);
                 IDToken = socket.handshake.auth.token;
                 return [4 /*yield*/, fetch("https://syirl-auth-backend.netlify.app/.netlify/functions/verify", {
                         method: "POST",
@@ -151,16 +154,16 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                             token: IDToken,
                         }),
                     })];
-            case 1:
+            case 2:
                 decodeResponse = _b.sent();
                 return [4 /*yield*/, decodeResponse.text()];
-            case 2:
+            case 3:
                 userID = _b.sent();
                 // verify user and authorisations
                 if (GameDoc === null || GameUsers === null) {
                     throw Error("Game data or Authorized Users hasnt loaded yet -> error while loading ?");
                 }
-                if (!(userID in GameUsers)) return [3 /*break*/, 3];
+                if (!(userID in GameUsers)) return [3 /*break*/, 4];
                 // check that if user is banned
                 if (GameUsers[userID].banned) {
                     // this user is banned, destroy socket
@@ -183,9 +186,9 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                 if (!LOCATIONS[userID])
                     // @ts-ignore
                     LOCATIONS[userID] = { IDToken: IDToken, banned: false, locations: [] };
-                return [3 /*break*/, 6];
-            case 3:
-                if (!GameDoc.public) return [3 /*break*/, 5];
+                return [3 /*break*/, 7];
+            case 4:
+                if (!GameDoc.public) return [3 /*break*/, 6];
                 // check if game is public
                 // add player to list of players
                 console.log("added new player");
@@ -193,7 +196,7 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                         banned: false,
                         imposter: false,
                     })];
-            case 4:
+            case 5:
                 _b.sent();
                 // authorized user
                 // add user to list
@@ -202,13 +205,14 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                 if (!LOCATIONS[userID])
                     // @ts-ignore
                     LOCATIONS[userID] = { IDToken: IDToken, banned: false, locations: [] };
-                return [3 /*break*/, 6];
-            case 5: 
+                return [3 /*break*/, 7];
+            case 6: 
             //console.log(GameUsers)
             // user doenst exist, error
             throw Error("invalid user");
-            case 6:
+            case 7:
                 // successfull!
+                console.log("A new user connected successfully!");
                 //select color
                 if (GameUsers)
                     // @ts-ignore
@@ -242,28 +246,28 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                 // send hide/show time:
                 if (!HidePhase) {
                     console.log("sending imposter visibility update to ", userID);
-                    socket.emit("imposter-visiblity", {
+                    socket.emit("imposter-visibility", {
                         nextHidePhase: Math.ceil(UpdateCallbackTime / 1000), // currently in show
                         nextShowPhase: Math.ceil((UpdateCallbackTime + GameDoc.imposterHideTime) / 1000),
                     });
                 }
                 else {
                     console.log("sending imposter visibility update 2 to ", userID);
-                    socket.emit("imposter-visiblity", {
+                    socket.emit("imposter-visibility", {
                         nextShowPhase: Math.ceil(UpdateCallbackTime / 1000), // currently in hide
                         nextHidePhase: Math.ceil((UpdateCallbackTime + GameDoc.imposterShowTime) / 1000),
                     });
                 }
                 //console.log("sending locations ALL", locations, LOCATIONS)
                 console.log("emitting location to connected players");
-                return [3 /*break*/, 8];
-            case 7:
+                return [3 /*break*/, 9];
+            case 8:
                 error_1 = _b.sent();
-                //console.log("failed to verify user", error)
+                console.log("failed to verify user", error_1);
                 // kill socket
                 socket.disconnect();
                 return [2 /*return*/];
-            case 8:
+            case 9:
                 console.log(
                 // @ts-ignore
                 "\u26A1: ".concat(USERS[socket.id], " verified user just connected!"));
@@ -345,7 +349,7 @@ function updateTime() {
         // send to all players
         console.log("sending imposter visibility update");
         if (GameDoc.imposterShowTime > 3000)
-            GameServer.emit("imposter-visiblity", {
+            GameServer.emit("imposter-visibility", {
                 nextHidePhase: Math.ceil(UpdateCallbackTime / 1000), // currently in show
                 nextShowPhase: Math.ceil((UpdateCallbackTime + GameDoc.imposterHideTime) / 1000),
             });
@@ -361,7 +365,7 @@ function updateTime() {
         // send to all players
         console.log("sending imposter visibility update 2");
         if (GameDoc.imposterHideTime > 3000)
-            GameServer.emit("imposter-visiblity", {
+            GameServer.emit("imposter-visibility", {
                 nextShowPhase: Math.ceil(UpdateCallbackTime / 1000), // currently in hide
                 nextHidePhase: Math.ceil((UpdateCallbackTime + GameDoc.imposterShowTime) / 1000),
             });
