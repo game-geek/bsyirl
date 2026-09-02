@@ -93,6 +93,11 @@ var unsubscribeGameDoc = (0, firestore_1.onSnapshot)(documentRef, function (docu
     else {
         // game was deleted, discard this process, handled automatically ??
     }
+}, function (error) {
+    console.error("Error while trying to susbscribe to the firebase game doc, code: " +
+        error.code +
+        "\n message: " +
+        error.message);
 });
 var collectionRef = (0, firestore_1.collection)(firebaseConfig_1.firestore, "games/" + GameID + "/users");
 var unsubscribeGameUsersCol = (0, firestore_1.onSnapshot)(collectionRef, function (collectionSnapshot) {
@@ -119,6 +124,11 @@ var unsubscribeGameUsersCol = (0, firestore_1.onSnapshot)(collectionRef, functio
             ? (ImposterSettings[impID] = { overrideLastSnapshot: 0 })
             : null;
     });
+}, function (error) {
+    console.error("Error while trying to susbscribe to the firebase game users collection, code: " +
+        error.code +
+        "\n message: " +
+        error.message);
 });
 // server setup
 var app = express();
