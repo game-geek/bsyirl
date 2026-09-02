@@ -30,7 +30,7 @@ const COLORS = [
 // Normaly in prod should be passed by parent, each server thread handles a game
 const GameID = process.env.GC; // shareCode
 let GameDoc: null | GameType = null;
-let GameUsers: null | GameUsersType = null;
+let GameUsers: null | GameUsersType = {}; // cannot put null bc in the beginning there are no users so it will then stay null forever
 let Imposters: string[] = [];
 const ImposterSettings: ImposterSettingType = {};
 const USERS: {

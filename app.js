@@ -70,7 +70,7 @@ var COLORS = [
 // Normaly in prod should be passed by parent, each server thread handles a game
 var GameID = process.env.GC; // shareCode
 var GameDoc = null;
-var GameUsers = null;
+var GameUsers = {}; // cannot put null bc in the beginning there are no users so it will then stay null forever
 var Imposters = [];
 var ImposterSettings = {};
 var USERS = {};
