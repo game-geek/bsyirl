@@ -181,6 +181,8 @@ GameServer.use((socket, next) => {
   next();
 });
 
+setTimeout(() => console.log("DEBUG", GameDoc, GameUsers), 5000);
+
 //👇🏻 Add this before the app.get() block
 GameServer.on("connection", async (socket) => {
   console.log("a connection attempt is happening now");

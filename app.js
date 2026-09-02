@@ -147,6 +147,7 @@ GameServer.use(function (socket, next) {
     //console.log("mmm", socket.id, USERS[socket.id])
     next();
 });
+setTimeout(function () { return console.log("DEBUG", GameDoc, GameUsers); }, 5000);
 //👇🏻 Add this before the app.get() block
 GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0, void 0, function () {
     var IDToken, decodeResponse, userID, locations_1, d_1, _loop_1, _i, _a, u, error_1;
