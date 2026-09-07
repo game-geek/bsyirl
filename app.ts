@@ -100,64 +100,69 @@ type LocationObjectCoords = {
 
 // create listener to game doc
 let documentRef = doc(firestore, "games/" + GameID);
-const unsubscribeGameDoc = onSnapshot(
-  documentRef,
-  (documentSnapshot) => {
-    if (documentSnapshot.exists()) {
-      // @ts-ignore
-      const data: GameType = documentSnapshot.data();
-      //console.log(data)
-      GameDoc = data;
-    } else {
-      // game was deleted, discard this process, handled automatically ??
-    }
-  },
-  (error) => {
-    console.error(
-      "Error while trying to susbscribe to the firebase game doc, code: " +
-        error.code +
-        "\n message: " +
-        error.message,
-    );
-  },
-);
 let collectionRef = collection(firestore, "games/" + GameID + "/users");
-const unsubscribeGameUsersCol = onSnapshot(
-  collectionRef,
-  (collectionSnapshot) => {
-    // parse data
-    // use collectionSnapshot.docChanges to modify permissions ??
-    // parse and convert to key value dict
-    const docs = collectionSnapshot.docs.map((doc) => {
-      return { uid: doc.id, ...doc.data() };
-    });
-    const users: GameUsersType = {};
+let unsubscribeGameDoc = null;
+let unsubscribeGameUsersCol = null;
 
-    // @ts-ignore
-    docs.forEach((doc) => (users[doc.uid] = doc));
+function startListeners() {
+  unsubscribeGameDoc = onSnapshot(
+    documentRef,
+    (documentSnapshot) => {
+      if (documentSnapshot.exists()) {
+        // @ts-ignore
+        const data: GameType = documentSnapshot.data();
+        //console.log(data)
+        GameDoc = data;
+      } else {
+        // game was deleted, discard this process, handled automatically ??
+      }
+    },
+    (error) => {
+      console.error(
+        "Error while trying to susbscribe to the firebase game doc, code: " +
+          error.code +
+          "\n message: " +
+          error.message,
+      );
+    },
+  );
+  unsubscribeGameUsersCol = onSnapshot(
+    collectionRef,
+    (collectionSnapshot) => {
+      // parse data
+      // use collectionSnapshot.docChanges to modify permissions ??
+      // parse and convert to key value dict
+      const docs = collectionSnapshot.docs.map((doc) => {
+        return { uid: doc.id, ...doc.data() };
+      });
+      const users: GameUsersType = {};
 
-    // update obj
-    GameUsers = users;
-    let tempImps: string[] = [];
-    for (const userID of Object.keys(users)) {
-      if (users[userID].imposter) tempImps.push(userID);
-    }
-    Imposters = tempImps;
-    tempImps.forEach((impID) =>
-      ImposterSettings[impID] == null
-        ? (ImposterSettings[impID] = { overrideLastSnapshot: 0 })
-        : null,
-    );
-  },
-  (error) => {
-    console.error(
-      "Error while trying to susbscribe to the firebase game users collection, code: " +
-        error.code +
-        "\n message: " +
-        error.message,
-    );
-  },
-);
+      // @ts-ignore
+      docs.forEach((doc) => (users[doc.uid] = doc));
+
+      // update obj
+      GameUsers = users;
+      let tempImps: string[] = [];
+      for (const userID of Object.keys(users)) {
+        if (users[userID].imposter) tempImps.push(userID);
+      }
+      Imposters = tempImps;
+      tempImps.forEach((impID) =>
+        ImposterSettings[impID] == null
+          ? (ImposterSettings[impID] = { overrideLastSnapshot: 0 })
+          : null,
+      );
+    },
+    (error) => {
+      console.error(
+        "Error while trying to susbscribe to the firebase game users collection, code: " +
+          error.code +
+          "\n message: " +
+          error.message,
+      );
+    },
+  );
+}
 
 // server setup
 const app = express();
@@ -180,7 +185,10 @@ GameServer.use((socket, next) => {
   //console.log("mmm", socket.id, USERS[socket.id])
   next();
 });
-console.log("DEBUG: set a timeout for in 60 secs");
+console.log(
+  "DEBUG: set a timeout for starting listeners in 40 secs, checking listeners 60 secs",
+);
+setTimeout(startListeners, 40000);
 setTimeout(() => console.log("DEBUG", GameDoc, GameUsers), 60000);
 
 //👇🏻 Add this before the app.get() block
