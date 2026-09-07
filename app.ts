@@ -278,7 +278,7 @@ GameServer.on("connection", async (socket) => {
         LOCATIONS[u].locations.forEach((loc) => {
           if (
             !HidePhase ||
-            d - loc.timestamp > (GameDoc?.imposterHideTime || Infinity)
+            d - loc.timestamp > (GameDoc?.imposterHideTime * 1000 || Infinity)
           ) {
             locations[u].push(loc.coords);
           }
@@ -293,7 +293,7 @@ GameServer.on("connection", async (socket) => {
       socket.emit("imposter-visibility", {
         nextHidePhase: Math.ceil(UpdateCallbackTime / 1000), // currently in show
         nextShowPhase: Math.ceil(
-          (UpdateCallbackTime + GameDoc.imposterHideTime) / 1000,
+          (UpdateCallbackTime + GameDoc.imposterHideTime * 1000) / 1000,
         ),
       });
     } else {
@@ -417,13 +417,16 @@ function updateTime() {
       GameServer.emit("imposter-visibility", {
         nextHidePhase: Math.ceil(UpdateCallbackTime / 1000), // currently in show
         nextShowPhase: Math.ceil(
-          (UpdateCallbackTime + GameDoc.imposterHideTime) / 1000,
+          (UpdateCallbackTime + GameDoc.imposterHideTime * 1000) / 1000,
         ),
       });
   } else {
     HidePhase = true;
-    UpdateCallbackTime = Date.now() + GameDoc.imposterHideTime;
-    updateTimeCallback = setTimeout(updateTime, GameDoc.imposterHideTime);
+    UpdateCallbackTime = Date.now() + GameDoc.imposterHideTime * 1000;
+    updateTimeCallback = setTimeout(
+      updateTime,
+      GameDoc.imposterHideTime * 1000,
+    );
 
     // reset impostersettings:
 
@@ -433,7 +436,7 @@ function updateTime() {
 
     // send to all players
     console.log("sending imposter visibility update 2");
-    if (GameDoc.imposterHideTime > 3000)
+    if (GameDoc.imposterHideTime * 1000 > 3000)
       GameServer.emit("imposter-visibility", {
         nextShowPhase: Math.ceil(UpdateCallbackTime / 1000), // currently in hide
         nextHidePhase: Math.ceil(
