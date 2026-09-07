@@ -68,8 +68,7 @@ var COLORS = [
     "bfef45",
 ];
 // Normaly in prod should be passed by parent, each server thread handles a game
-var GameID = process.env.GC; // shareCode
-console.log("GAME ID: ", GameID);
+var GameID = process.env.GAME; // shareCode
 var GameDoc = null;
 var GameUsers = {}; // cannot put null bc in the beginning there are no users so it will then stay null forever
 var Imposters = [];
@@ -84,57 +83,53 @@ var UpdateCallbackTime = Date.now();
 var updateTimeCallback = null;
 // create listener to game doc
 var documentRef = (0, firestore_1.doc)(firebaseConfig_1.firestore, "games/" + GameID);
-var collectionRef = (0, firestore_1.collection)(firebaseConfig_1.firestore, "games/" + GameID + "/users");
-var unsubscribeGameDoc = null;
-var unsubscribeGameUsersCol = null;
-function startListeners() {
-    unsubscribeGameDoc = (0, firestore_1.onSnapshot)(documentRef, function (documentSnapshot) {
-        if (documentSnapshot.exists()) {
-            // @ts-ignore
-            var data = documentSnapshot.data();
-            //console.log(data)
-            GameDoc = data;
-        }
-        else {
-            // game was deleted, discard this process, handled automatically ??
-        }
-    }, function (error) {
-        console.error("Error while trying to susbscribe to the firebase game doc, code: " +
-            error.code +
-            "\n message: " +
-            error.message);
-    });
-    unsubscribeGameUsersCol = (0, firestore_1.onSnapshot)(collectionRef, function (collectionSnapshot) {
-        // parse data
-        // use collectionSnapshot.docChanges to modify permissions ??
-        // parse and convert to key value dict
-        var docs = collectionSnapshot.docs.map(function (doc) {
-            return __assign({ uid: doc.id }, doc.data());
-        });
-        var users = {};
+var unsubscribeGameDoc = (0, firestore_1.onSnapshot)(documentRef, function (documentSnapshot) {
+    if (documentSnapshot.exists()) {
         // @ts-ignore
-        docs.forEach(function (doc) { return (users[doc.uid] = doc); });
-        // update obj
-        GameUsers = users;
-        var tempImps = [];
-        for (var _i = 0, _a = Object.keys(users); _i < _a.length; _i++) {
-            var userID = _a[_i];
-            if (users[userID].imposter)
-                tempImps.push(userID);
-        }
-        Imposters = tempImps;
-        tempImps.forEach(function (impID) {
-            return ImposterSettings[impID] == null
-                ? (ImposterSettings[impID] = { overrideLastSnapshot: 0 })
-                : null;
-        });
-    }, function (error) {
-        console.error("Error while trying to susbscribe to the firebase game users collection, code: " +
-            error.code +
-            "\n message: " +
-            error.message);
+        var data = documentSnapshot.data();
+        //console.log(data)
+        GameDoc = data;
+    }
+    else {
+        // game was deleted, discard this process, handled automatically ??
+    }
+}, function (error) {
+    console.error("Error while trying to susbscribe to the firebase game doc, code: " +
+        error.code +
+        "\n message: " +
+        error.message);
+});
+var collectionRef = (0, firestore_1.collection)(firebaseConfig_1.firestore, "games/" + GameID + "/users");
+var unsubscribeGameUsersCol = (0, firestore_1.onSnapshot)(collectionRef, function (collectionSnapshot) {
+    // parse data
+    // use collectionSnapshot.docChanges to modify permissions ??
+    // parse and convert to key value dict
+    var docs = collectionSnapshot.docs.map(function (doc) {
+        return __assign({ uid: doc.id }, doc.data());
     });
-}
+    var users = {};
+    // @ts-ignore
+    docs.forEach(function (doc) { return (users[doc.uid] = doc); });
+    // update obj
+    GameUsers = users;
+    var tempImps = [];
+    for (var _i = 0, _a = Object.keys(users); _i < _a.length; _i++) {
+        var userID = _a[_i];
+        if (users[userID].imposter)
+            tempImps.push(userID);
+    }
+    Imposters = tempImps;
+    tempImps.forEach(function (impID) {
+        return ImposterSettings[impID] == null
+            ? (ImposterSettings[impID] = { overrideLastSnapshot: 0 })
+            : null;
+    });
+}, function (error) {
+    console.error("Error while trying to susbscribe to the firebase game users collection, code: " +
+        error.code +
+        "\n message: " +
+        error.message);
+});
 // server setup
 var app = express();
 var PORT = 4058;
@@ -152,9 +147,7 @@ GameServer.use(function (socket, next) {
     //console.log("mmm", socket.id, USERS[socket.id])
     next();
 });
-console.log("DEBUG: set a timeout for starting listeners in 20 secs, checking listeners 40 secs");
-setTimeout(startListeners, 20000);
-setTimeout(function () { return console.log("DEBUG", GameDoc, GameUsers); }, 40000);
+setTimeout(function () { return console.log("DEBUG", GameDoc, GameUsers); }, 20000);
 //👇🏻 Add this before the app.get() block
 GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0, void 0, function () {
     var IDToken, decodeResponse, userID, locations_1, d_1, _loop_1, _i, _a, u, error_1;
