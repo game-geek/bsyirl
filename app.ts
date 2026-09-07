@@ -29,6 +29,7 @@ const COLORS = [
 
 // Normaly in prod should be passed by parent, each server thread handles a game
 const GameID = process.env.GC; // shareCode
+console.log("GAME ID: ", GameID);
 let GameDoc: null | GameType = null;
 let GameUsers: null | GameUsersType = {}; // cannot put null bc in the beginning there are no users so it will then stay null forever
 let Imposters: string[] = [];
@@ -186,10 +187,10 @@ GameServer.use((socket, next) => {
   next();
 });
 console.log(
-  "DEBUG: set a timeout for starting listeners in 40 secs, checking listeners 60 secs",
+  "DEBUG: set a timeout for starting listeners in 20 secs, checking listeners 40 secs",
 );
-setTimeout(startListeners, 40000);
-setTimeout(() => console.log("DEBUG", GameDoc, GameUsers), 60000);
+setTimeout(startListeners, 20000);
+setTimeout(() => console.log("DEBUG", GameDoc, GameUsers), 40000);
 
 //👇🏻 Add this before the app.get() block
 GameServer.on("connection", async (socket) => {
