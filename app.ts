@@ -180,8 +180,8 @@ GameServer.use((socket, next) => {
   //console.log("mmm", socket.id, USERS[socket.id])
   next();
 });
-
-setTimeout(() => console.log("DEBUG", GameDoc, GameUsers), 5000);
+console.log("DEBUG: set a timeout for in 60 secs");
+setTimeout(() => console.log("DEBUG", GameDoc, GameUsers), 60000);
 
 //👇🏻 Add this before the app.get() block
 GameServer.on("connection", async (socket) => {
