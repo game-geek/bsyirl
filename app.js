@@ -266,7 +266,7 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                     console.log("sending imposter visibility update 2 to ", userID);
                     socket.emit("imposter-visibility", {
                         nextShowPhase: Math.ceil(UpdateCallbackTime / 1000), // currently in hide
-                        nextHidePhase: Math.ceil((UpdateCallbackTime + GameDoc.imposterShowTime) / 1000),
+                        nextHidePhase: Math.ceil((UpdateCallbackTime + GameDoc.imposterShowTime * 1000) / 1000),
                     });
                 }
                 //console.log("sending locations ALL", locations, LOCATIONS)
@@ -355,11 +355,11 @@ function updateTime() {
     }
     if (HidePhase) {
         HidePhase = false;
-        UpdateCallbackTime = Date.now() + GameDoc.imposterShowTime;
-        updateTimeCallback = setTimeout(updateTime, GameDoc.imposterShowTime);
+        UpdateCallbackTime = Date.now() + GameDoc.imposterShowTime * 1000;
+        updateTimeCallback = setTimeout(updateTime, GameDoc.imposterShowTime * 1000);
         // send to all players
         console.log("sending imposter visibility update");
-        if (GameDoc.imposterShowTime > 3000)
+        if (GameDoc.imposterShowTime * 1000 > 3000)
             GameServer.emit("imposter-visibility", {
                 nextHidePhase: Math.ceil(UpdateCallbackTime / 1000), // currently in show
                 nextShowPhase: Math.ceil((UpdateCallbackTime + GameDoc.imposterHideTime) / 1000),
@@ -378,7 +378,7 @@ function updateTime() {
         if (GameDoc.imposterHideTime > 3000)
             GameServer.emit("imposter-visibility", {
                 nextShowPhase: Math.ceil(UpdateCallbackTime / 1000), // currently in hide
-                nextHidePhase: Math.ceil((UpdateCallbackTime + GameDoc.imposterShowTime) / 1000),
+                nextHidePhase: Math.ceil((UpdateCallbackTime + GameDoc.imposterShowTime * 1000) / 1000),
             });
     }
 }
@@ -432,7 +432,7 @@ function sendPlayersLocation() {
                         locations[userID] = ts.coords;
                         break;
                     }
-                    else if (ts.timestamp < millis - GameDoc.imposterShowTime) {
+                    else if (ts.timestamp < millis - GameDoc.imposterShowTime * 1000) {
                         locations[userID] =
                             LOCATIONS[userID].locations[lastLocationPos].coords;
                         break;
