@@ -157,7 +157,7 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                 console.log("a connection attempt is happening now");
                 _b.label = 1;
             case 1:
-                _b.trys.push([1, 8, , 9]);
+                _b.trys.push([1, 11, , 12]);
                 IDToken = socket.handshake.auth.token;
                 return [4 /*yield*/, fetch("https://syirl-auth-backend.netlify.app/.netlify/functions/verify", {
                         method: "POST",
@@ -174,22 +174,27 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                 if (GameDoc === null || GameUsers === null) {
                     throw Error("Game data or Authorized Users hasnt loaded yet -> error while loading ?");
                 }
-                if (!(userID in GameUsers)) return [3 /*break*/, 4];
+                if (!(userID in GameUsers)) return [3 /*break*/, 7];
                 // check that if user is banned
                 if (GameUsers[userID].banned) {
                     // this user is banned, destroy socket
                     throw Error("banned user");
                 }
-                // for private games
-                if (!GameDoc.public) {
-                    if (GameDoc.authorizedUsers.includes(userID)) {
-                        // authorized user
-                    }
-                    else {
-                        // not verified
-                        throw Error("need permission to access this game");
-                    }
-                }
+                if (!!GameDoc.public) return [3 /*break*/, 6];
+                if (!GameDoc.authorizedUsers.includes(userID)) return [3 /*break*/, 4];
+                return [3 /*break*/, 6];
+            case 4: 
+            // add to users list for admin to approove
+            return [4 /*yield*/, (0, firestore_1.setDoc)((0, firestore_1.doc)(firebaseConfig_1.firestore, "games/".concat(GameID, "/users/").concat(userID)), {
+                    banned: false,
+                    imposter: false,
+                })];
+            case 5:
+                // add to users list for admin to approove
+                _b.sent();
+                // not verified
+                throw Error("need permission to access this game");
+            case 6:
                 // authorized user
                 // add user to list
                 // @ts-ignore
@@ -197,9 +202,9 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                 if (!LOCATIONS[userID])
                     // @ts-ignore
                     LOCATIONS[userID] = { IDToken: IDToken, banned: false, locations: [] };
-                return [3 /*break*/, 7];
-            case 4:
-                if (!GameDoc.public) return [3 /*break*/, 6];
+                return [3 /*break*/, 10];
+            case 7:
+                if (!GameDoc.public) return [3 /*break*/, 9];
                 // check if game is public
                 // add player to list of players
                 console.log("added new player");
@@ -207,7 +212,7 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                         banned: false,
                         imposter: false,
                     })];
-            case 5:
+            case 8:
                 _b.sent();
                 // authorized user
                 // add user to list
@@ -216,12 +221,12 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                 if (!LOCATIONS[userID])
                     // @ts-ignore
                     LOCATIONS[userID] = { IDToken: IDToken, banned: false, locations: [] };
-                return [3 /*break*/, 7];
-            case 6: 
+                return [3 /*break*/, 10];
+            case 9: 
             //console.log(GameUsers)
             // user doenst exist, error
             throw Error("invalid user");
-            case 7:
+            case 10:
                 // successfull!
                 console.log("A new user connected successfully!");
                 //select color
@@ -271,14 +276,14 @@ GameServer.on("connection", function (socket) { return __awaiter(void 0, void 0,
                 }
                 //console.log("sending locations ALL", locations, LOCATIONS)
                 console.log("emitting location to connected players");
-                return [3 /*break*/, 9];
-            case 8:
+                return [3 /*break*/, 12];
+            case 11:
                 error_1 = _b.sent();
                 console.log("failed to verify user", error_1);
                 // kill socket
                 socket.disconnect();
                 return [2 /*return*/];
-            case 9:
+            case 12:
                 console.log(
                 // @ts-ignore
                 "\u26A1: ".concat(USERS[socket.id], " verified user just connected!"));

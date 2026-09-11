@@ -221,6 +221,11 @@ GameServer.on("connection", async (socket) => {
         if (GameDoc.authorizedUsers.includes(userID)) {
           // authorized user
         } else {
+          // add to users list for admin to approove
+          await setDoc(doc(firestore, `games/${GameID}/users/${userID}`), {
+            banned: false,
+            imposter: false,
+          });
           // not verified
           throw Error("need permission to access this game");
         }
